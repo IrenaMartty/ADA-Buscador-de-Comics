@@ -4,20 +4,99 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/md5/2.3.0/md5.min.js"></script>
+
         <!-- Tailwind y css Linkeado-->
         <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="./CSS/style.css">
+        <link rel="stylesheet" href="style.css">
         <!-- Iconos y fuentes -->
-        <!-- <link rel="icon" type="image/svg+xml" href="./Images/piggy-bank-icon.svg">
-        <link rel="icon" type="image/png" href="./Images/piggy-bank-icon.png"> -->
+        <link rel="icon" type="image/png" href="./Images/logo.png">
         <script src="https://kit.fontawesome.com/ae0032aa41.js" crossorigin="anonymous"></script>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;500;600;800&family=Rubik+Glitch+Pop&display=swap" rel="stylesheet">
     <title>Buscador de comics</title>
 </head>
-<body>
-  
-    <script src="app.js"></script>
+<body class="font-['Barlow_Condensed']">
+  <header>
+    <div class="bg-black flex justify-center">
+        <h1 class="header-title text-white bg-[#ed1c23] px-2 py-1 font-['Rubik_Glitch_Pop'] font-bold text-3xl">
+            ADA COMICS
+        </h1>
+    </div>
+</header>
+<div class="">
+    <img src="./Images/cover.jpg" alt="Marvel characters">
+</div>
+<main class="">
+    <div class="p-10 flex flex-col">
+        <h2 class="search-title text-5xl font-bold">
+            Búsqueda
+        </h2>
+        <div class="search-containers flex flex-row md:max-lg:flex-col py-5 justify-between flex-wrap text-2xl">
+            <div class="p-1 mr-10 grow">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <label for="search-text"></label>
+                <input type="text" id="search-text" class="search-text p-1" placeholder="Ingresa aquí">
+            </div>
+            <div>
+                <div class="max-sm:flex-col">
+                    <label for="type">Tipo</label>
+                    <select name="type" id="type" class="border-2 rounded p-1 mr-10 mb-10 font-semibold hover:border-[#ed1c23]">
+                        <option value="comic-title">Comics</option>
+                        <option value="comic-character">Personajes</option>
+                    </select>
+                    <label for="order">Orden</label>
+                    <select name="order" id="order" class="border-2 rounded p-1 mr-10 font-semibold hover:border-[#ed1c23]">
+                        <option value="ascending">A-Z</option>
+                        <option value="descending">Z-A</option>
+                        <option value="newer">Más nuevos</option>
+                        <option value="older">Más viejos</option>
+                    </select>
+                    <button type="button" class="button-search  py-1 px-4 mr-10 font-semibold text-white bg-[#ed1c23] hover:bg-[#BC0300]">BUSCAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="p-10">
+        <section class="page-comic hidden"></section>
+        <section class="page-character hidden"></section>
+        <section class="page-results">
+            <h2 class="search-title text-5xl font-bold ">
+                Resultados
+            </h2>
+            <p class="number-of-results text-slate-500">
+                <span class="total-number"></span>
+                RESULTADOS
+            </p>
+            <div class="show-results" id="show-results">
+            </div>
+            <div class="page-nav flex justify-center m-10 text-3xl">
+                <button id="first-page">
+                    <i class="fa-solid fa-backward bg-[#ed1c23] hover:bg-[#BC0300] text-white p-1.5 m-1"></i>
+                </button>
+                <button id="previous-page">
+                    <i class="fa-solid fa-caret-left bg-[#ed1c23] hover:bg-[#BC0300] text-white p-1.5 px-3.5 m-1"></i>
+                </button>
+                <button id="next-page">
+                    <i class="fa-solid fa-caret-right bg-[#ed1c23] hover:bg-[#BC0300] text-white p-1.5 px-3.5 m-1"></i>
+                </button>
+                <button id="last-page">
+                    <i class="fa-solid fa-forward bg-[#ed1c23] hover:bg-[#BC0300] text-white p-1.5 m-1"></i>
+                </button>
+            </div>
+        </section>
+        <div class="load-container hidden">
+            <div></div>
+        </div>
+        
+    </div>
+</main>
+<footer>
+    <div class="footer bg-black text-white flex justify-center text-2xl font-bold p-2 font-['Rubik_Glitch_Pop']">Hecho con
+        <span><i class="fa-regular fa-heart px-2"></i></span>
+    </div>
+</footer>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
