@@ -1,4 +1,4 @@
-/* UTILITIES */
+// /* UTILITIES */
 
 const getData = (key) => JSON.parse(localStorage.getItem(key));
 const setData = (key, data) => localStorage.setItem(key, JSON.stringify(data));
@@ -22,20 +22,52 @@ const cleanContainer = (selector) => ($(selector).innerHTML = "");
 
 
 /* FETCH DATA */
-import md5 from 'md5';
-const publicKey = '0335f001bb01e93161a44ee9147e0f49';
-const privateKey = 'd707c0336b0d9058003cf52341db5b263a6b1f39';
-const timestamp = new Date().getTime();
-const hash = md5(timestamp + privateKey + publicKey);
+const urlBase = `https://gateway.marvel.com/v1/public/`
+let ts = `ts=1`
+const publicKey = "&apikey=0335f001bb01e93161a44ee9147e0f49"
+const hash = "&hash=a5965c3c8fdffc56ab090cf5dfedc332"
 
-const url = `http://gateway.marvel.com/v1/public/comics?ts=${timestamp}&apikey=${publicKey}&hash=${hash}`;
+const getMarvelComics = async() => {
+    const url = `${urlBase}comics?${ts}${publicKey}${hash}`
+    const response = await fetch(url)
+    const data = await response.json()
+console.log(data)
+printData(data.data.results)
+}
+getMarvelComics()
+
+const printData = (arr) => {
+  let comicCards = ""
+  
+  
+  arr.forEach((comic) => {
+    comicCards = 
+    comicCards += `
+        <div class="">
+        <img src=${comic.images}>
+        <h3>${comic.title}</h3>
+        </div>
+        
+        `
+    })
+    $("#show-results").innerHTML = comicCards
+    console.log(comicCards);
+}
+
+const pageNumber = async(pageNum) => {
+    const result = await pageNum
+    $("#first-page").addEventListener("click", () => {
+        if(page>2){
+            page=1
+            getData()
+        }
+    })
+    $("#last-page").addEventListener("click", () => {
+        if(page < pageCount){
+            page=112
+            getData()
+        }
+    })
 
 
-fetch(url) 
-.then(response => response.json())
-.then(data => {
-    console.log(data)
-})
-.catch(error => {
-    console.error('Error fetching data:', error)
-})
+}
