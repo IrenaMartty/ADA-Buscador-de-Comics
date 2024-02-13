@@ -48,10 +48,10 @@
                     </select>
                     <label for="order">Orden</label>
                     <select name="order" id="order" class="border-2 rounded p-1 mr-10 font-semibold hover:border-[#ed1c23]">
-                        <option value="ascending">A-Z</option>
-                        <option value="descending">Z-A</option>
-                        <option value="newer">Más nuevos</option>
-                        <option value="older">Más viejos</option>
+                        <option class="ascending" value="ascending">A-Z</option>
+                        <option class="descending" value="descending">Z-A</option>
+                        <option class="newer" value="newer">Más nuevos</option>
+                        <option class="older" value="older">Más viejos</option>
                     </select>
                     <button type="button" class="button-search  py-1 px-4 mr-10 font-semibold text-white bg-[#ed1c23] hover:bg-[#BC0300]">BUSCAR</button>
                 </div>
@@ -69,7 +69,7 @@
                 <span class="total-number"></span>
                 RESULTADOS
             </p>
-            <div class="show-results flex flex-wrap" id="show-results">
+            <div class="show-results grid grid-cols-5 gap-3 mt-5" id="show-results">
             </div>
             <div class="page-nav flex justify-center m-10 text-3xl">
                 <button id="first-page">
