@@ -101,8 +101,6 @@ const printDataCharacters = async(name) => {
 // printDataCharacters()
 
 
-
-
 /* FILTER DATA */
 
 // Text search 
@@ -110,8 +108,10 @@ $(".search-text").addEventListener("input", async() => {
   const searchText = $(".search-text").value;
   console.log("Search Text:", searchText);
   await printDataComics(searchText);
+  await totalResultsNum()
 })
 // Type filter
+
 
 // Order filters
 
@@ -135,3 +135,13 @@ $(".search-text").addEventListener("input", async() => {
 
 
 // }
+const totalResultsNum = async () => {
+  try {
+    const comics = await getMComics();
+    const totalResults = comics.length; 
+    $(".total-number").innerHTML = `${totalResults}`;
+  } catch (error) {
+    console.error("Error fetching total results:", error);
+  }
+};
+totalResultsNum()
