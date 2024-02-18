@@ -43,17 +43,17 @@
                 <div class="max-sm:flex-col">
                     <label for="type">Tipo</label>
                     <select name="type" id="type" class="border-2 rounded p-1 mr-10 mb-10 font-semibold hover:border-[#ed1c23]">
-                        <option value="comic-title">Comics</option>
-                        <option value="comic-character">Personajes</option>
+                        <option value="comics">Comics</option>
+                        <option value="characters">Personajes</option>
                     </select>
                     <label for="order">Orden</label>
                     <select name="order" id="order" class="border-2 rounded p-1 mr-10 font-semibold hover:border-[#ed1c23]">
-                        <option class="ascending" value="ascending">A-Z</option>
-                        <option class="descending" value="descending">Z-A</option>
-                        <option class="newer" value="newer">Más nuevos</option>
-                        <option class="older" value="older">Más viejos</option>
+                        <option class="ascending" value="name">A-Z</option>
+                        <option class="descending" value="-name">Z-A</option>
+                        <option class="newer" value="modified">Más nuevos</option>
+                        <option class="older" value="-modified">Más viejos</option>
                     </select>
-                    <button type="button" class="button-search  py-1 px-4 mr-10 font-semibold text-white bg-[#ed1c23] hover:bg-[#BC0300]">BUSCAR</button>
+                    <button type="button" id="button-search" class="button-search  py-1 px-4 mr-10 font-semibold text-white bg-[#ed1c23] hover:bg-[#BC0300]">BUSCAR</button>
                 </div>
             </div>
         </div>
@@ -85,6 +85,9 @@
                     <i class="fa-solid fa-forward bg-[#ed1c23] hover:bg-[#BC0300] text-white p-1.5 m-1"></i>
                 </button>
             </div>
+            <p class="current-page mr-2 flex justify-center text-slate-500">
+                <span class="number-of-pages"></span>
+            </p>
         </section>
         <div class="load-container hidden">
             <div></div>
