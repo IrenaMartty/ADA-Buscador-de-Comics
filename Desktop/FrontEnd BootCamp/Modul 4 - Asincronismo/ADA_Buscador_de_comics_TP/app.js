@@ -53,33 +53,33 @@ return(data.data.results)
 /* PRINT DATA */
 const printDataComics = async (title) => {
   try {
-      const comics = await getMComics(title);
-      console.log("Comics:", comics);
+    const comics = await getMComics(title);
+    console.log("Comics:", comics);
 
-      const showResultsContainer = $("#show-results");
-      cleanContainer(showResultsContainer);
+    const showResultsContainer = $("#show-results");
+    cleanContainer(showResultsContainer);
 
-      let html = '';
+    let html = '';
 
-      if (comics && comics.length > 0) {
-          for (let comic of comics) {
-            const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
-            console.log("Image URL:", imageUrl)
+    if (comics && comics.length > 0) {
+      for (let comic of comics) {
+        const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
+        console.log("Image URL:", imageUrl);
 
-              html += `
-                  <div>
-                      <img src="${imageUrl}" alt="${comic.title}">
-                      <p>${comic.title}</p>
-                  </div>
-              `;
-          }
-      } else {
-          html = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
+        html += `
+          <div>
+            <img src="${imageUrl}" alt="${comic.title}">
+            <p>${comic.title}</p>
+          </div>
+        `;
       }
+    } else if (search.trim() !== '') {
+      html = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
+    }
 
-      showResultsContainer.innerHTML = html;
+    showResultsContainer.innerHTML = html;
   } catch (error) {
-      console.error("Error:", error);
+    console.error("Error:", error);
   }
 };
 
@@ -106,8 +106,8 @@ const printDataCharacters = async(name) => {
             <p>${character.name}</p>
           </div>`
       }
-    } else {
-      showResultsContainer.innerHTML = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No characters found</p>`;
+    } else if (search.trim() !== '') {
+      html = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
     }
   } catch (error)
   {
@@ -118,13 +118,14 @@ printDataCharacters()
 
 
 /* FILTER DATA */
-// // elementos de funcionalidad
+
+// // Elements
 const $order = $("#order")
 const $type = $("#type")
 const $search = $("#search-text")
 const $searchButton = $("#button-search")
 
-// // viariables de control
+// // Control
 let offset = 0
 let type = "comics"
 let orderBy = "title"
@@ -140,22 +141,27 @@ let dataComics = [];
 
 async function getApiData() {
   try {
-    let orderByParam;
-    if (type === "comics") {
-      orderByParam = orderBy === "modified" ? "-modified" : "title";
-    } else if (type === "characters") {
-      orderByParam = orderBy === "modified" ? "-modified" : "name";
-    }
-
-    const response = await fetch(
-      `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type === "comics" ? "title" : "name"}StartsWith=${search}`}`
-    );
-
-    const data = await response.json();
-    dataComics = data.data.results;
-    render();
+      let orderByParam;
+      if (orderBy === "modified") {
+          orderByParam = "-modified";
+      } else {
+          orderByParam = type === "comics" ? (orderBy || "title") : (orderBy ? orderBy : "name");
+      }
+      const response = await fetch(
+          `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type == "comics" ? "title" : "name"}StartsWith=${search}`}`
+      );
+      const data = await response.json();
+      if (data.data && data.data.results) {
+          dataComics = data.data.results;
+      } else {
+          dataComics = []
+      }
+      render();
   } catch (error) {
-    console.log(error);
+      console.log(error);
+      dataComics = []; 
+      render(); 
+
   }
 }
 
@@ -163,40 +169,43 @@ function render() {
   const showResultsContainer = $("#show-results");
   cleanContainer(showResultsContainer);
   let html = '';
-  let sortedData = dataComics;
   
-  if (orderBy === "modified") {
-    sortedData = sortedData.sort((a, b) => new Date(a.modified) - new Date(b.modified));
-  } else if (orderBy === "-modified") {
-    sortedData = sortedData.sort((a, b) => new Date(b.modified) - new Date(a.modified));
-  } else if (orderBy === "name") {
-    sortedData = sortedData.sort((a, b) => a.name.localeCompare(b.name));
-  } else if (orderBy === "-name") {
-    sortedData = sortedData.sort((a, b) => b.name.localeCompare(a.name));
-  } 
+  if (dataComics && dataComics.length > 0) {
+    let sortedData = dataComics;
+    if (orderBy === "modified") {
+      sortedData = sortedData.sort((a, b) => new Date(a.modified) - new Date(b.modified));
+    } else if (orderBy === "-modified") {
+      sortedData = sortedData.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+    } else if (orderBy === "name") {
+      sortedData = sortedData.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (orderBy === "-name") {
+      sortedData = sortedData.sort((a, b) => b.name.localeCompare(a.name));
+    }
   
-  if (type === "comics") {
-    dataComics.forEach((comic) => {
-      const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
-      html += `
-        <div onClick="getDetailData(${comic.id})">
-          <img src="${imageUrl}" alt="${comic.title}">
-          <p>${comic.title}</p>
-        </div>`;
-    });
-  } else if (type === "characters") {
-    dataComics.forEach((character) => {
-      const characterURL = `${character.thumbnail.path}.${character.thumbnail.extension}`
-      html += `
-      <div onClick="getDetailData(${character.id})">
-      <img src="${characterURL}" alt="${character.name}">
-          <p>${character.name}</p>
-      </div>`;
-    });
+    if (type === "comics") {
+      sortedData.forEach((comic) => {
+        const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
+        html += `
+          <div onClick="getDetailData(${comic.id})">
+            <img src="${imageUrl}" alt="${comic.title}">
+            <p>${comic.title}</p>
+          </div>`;
+      });
+    } else if (type === "characters") {
+      sortedData.forEach((character) => {
+        const characterURL = `${character.thumbnail.path}.${character.thumbnail.extension}`
+        html += `
+          <div onClick="getDetailData(${character.id})">
+            <img src="${characterURL}" alt="${character.name}">
+            <p>${character.name}</p>
+          </div>`;
+      });
+    }
+  } else {
+    html = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
   }
   
   showResultsContainer.innerHTML = html;
-
 }
 
 $order.onchange = function(e) {
