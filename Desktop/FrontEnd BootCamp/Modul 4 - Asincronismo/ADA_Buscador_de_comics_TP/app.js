@@ -20,6 +20,11 @@ const hideElement = (selectors) => {
 
 const cleanContainer = (element) => {element.innerHTML = "";}
 
+const today = new Date()
+
+// console.log(today)
+
+
 /* FETCH DATA */
 const urlBase = `https://gateway.marvel.com/v1/public/`
 let ts = `ts=1`
@@ -46,32 +51,39 @@ return(data.data.results)
 }
 
 /* PRINT DATA */
-const printDataComics = async(title) => {
-  try{
+const printDataComics = async (title) => {
+  try {
+      const comics = await getMComics(title);
+      console.log("Comics:", comics);
 
-    const comics = await getMComics(title)
-    console.log(comics);
-  
-   const showResultsContainer = $("#show-results");
-    cleanContainer(showResultsContainer); 
-  
-    if (comics && comics.length > 0) {
-      for (let comic of comics) {
-        showResultsContainer.innerHTML += `
-          <div>
-            <img src="" alt="">
-            <p>${comic.title}</p>
-          </div>`
+      const showResultsContainer = $("#show-results");
+      cleanContainer(showResultsContainer);
+
+      let html = '';
+
+      if (comics && comics.length > 0) {
+          for (let comic of comics) {
+            const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
+            console.log("Image URL:", imageUrl)
+
+              html += `
+                  <div>
+                      <img src="${imageUrl}" alt="${comic.title}">
+                      <p>${comic.title}</p>
+                  </div>
+              `;
+          }
+      } else {
+          html = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
       }
-    } else {
-      showResultsContainer.innerHTML = `<p class="text-2xl text-[#ed1c23]"><i class="fa-solid fa-circle-exclamation mr-1"></i>No comics found</p>`;
-    }
-  } catch (error)
-  {
-    console.error("Error:", error);
+
+      showResultsContainer.innerHTML = html;
+  } catch (error) {
+      console.error("Error:", error);
   }
 };
-printDataComics()
+
+printDataComics();
 
 const printDataCharacters = async(name) => {
   try{
@@ -80,12 +92,17 @@ const printDataCharacters = async(name) => {
   
    const showResultsContainer = $("#show-results");
     cleanContainer(showResultsContainer); 
+
+    let html = ''
   
     if (characters && characters.length > 0) {
       for (let character of characters) {
-        showResultsContainer.innerHTML += `
+        const characterURL = `${character.thumbnail.path}.${character.thumbnail.extension}`
+        console.log("character URL:", characterURL);
+        
+        html += `
           <div>
-            <img src="" alt="">
+            <img src="${characterURL}" alt="${character.name}">
             <p>${character.name}</p>
           </div>`
       }
@@ -119,31 +136,26 @@ const $prev = $("#previous-page");
 const $next = $("#next-page");
 const $last = $("#last-page");
 
-// Text search 
-// $(".search-text").addEventListener("input", async() => {
-//   const searchText = $(".search-text").value;
-//   await printDataComics(searchText);
-//   await totalResultsNum()
-// })
-
 let dataComics = [];
 
 async function getApiData() {
   try {
-      let orderByParam;
-      if (orderBy === "modified") {
-          orderByParam = "-modified";
-      } else {
-          orderByParam = type === "comics" ? (orderBy || "title") : (orderBy ? orderBy : "name");
-      }
-      const response = await fetch(
-          `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type == "comics" ? "title" : "name"}StartsWith=${search}`}`
-      );
-      const data = await response.json();
-      dataComics = data.data.results;
-      render();
+    let orderByParam;
+    if (type === "comics") {
+      orderByParam = orderBy === "modified" ? "-modified" : "title";
+    } else if (type === "characters") {
+      orderByParam = orderBy === "modified" ? "-modified" : "name";
+    }
+
+    const response = await fetch(
+      `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type === "comics" ? "title" : "name"}StartsWith=${search}`}`
+    );
+
+    const data = await response.json();
+    dataComics = data.data.results;
+    render();
   } catch (error) {
-      console.log(error);
+    console.log(error);
   }
 }
 
@@ -151,32 +163,60 @@ function render() {
   const showResultsContainer = $("#show-results");
   cleanContainer(showResultsContainer);
   let html = '';
+  let sortedData = dataComics;
+  
+  if (orderBy === "modified") {
+    sortedData = sortedData.sort((a, b) => new Date(a.modified) - new Date(b.modified));
+  } else if (orderBy === "-modified") {
+    sortedData = sortedData.sort((a, b) => new Date(b.modified) - new Date(a.modified));
+  } else if (orderBy === "name") {
+    sortedData = sortedData.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (orderBy === "-name") {
+    sortedData = sortedData.sort((a, b) => b.name.localeCompare(a.name));
+  } 
   
   if (type === "comics") {
     dataComics.forEach((comic) => {
-      html += `<div onClick="getDetailData(${comic.id})">${comic.title}</div>`;
+      const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
+      html += `
+        <div onClick="getDetailData(${comic.id})">
+          <img src="${imageUrl}" alt="${comic.title}">
+          <p>${comic.title}</p>
+        </div>`;
     });
   } else if (type === "characters") {
     dataComics.forEach((character) => {
-      html += `<div onClick="getDetailData(${character.id})">${character.name}</div>`;
+      const characterURL = `${character.thumbnail.path}.${character.thumbnail.extension}`
+      html += `
+      <div onClick="getDetailData(${character.id})">
+      <img src="${characterURL}" alt="${character.name}">
+          <p>${character.name}</p>
+      </div>`;
     });
   }
   
   showResultsContainer.innerHTML = html;
+
 }
 
 $order.onchange = function(e) {
-  if(type === "comics" && e.target.value === "name") {
-    orderBy = "title"
-  } else if (type == "comics" && e.target.value == "-name") {
+  if (type === "comics" && e.target.value === "name") {
+    orderBy = "title";
+  } else if (type === "comics" && e.target.value === "-name") {
     orderBy = "-title";
-    return;
+  } else if (type === "characters" && e.target.value === "name") {
+    orderBy = "name";
+  } else if (type === "characters" && e.target.value === "-name") {
+    orderBy = "-name";
+  } else if (type === "comics" && e.target.value === "modified") {
+    orderBy = "modified";
+  } else if (type === "comics" && e.target.value === "-modified") {
+    orderBy = "-modified";
   } else {
     orderBy = e.target.value;
   }
   console.log(orderBy);
-
-}
+};
 
 $type.onchange = function(e) {
   type = e.target.value
@@ -186,6 +226,10 @@ $type.onchange = function(e) {
   } else if (type == "comics" && orderBy == "-name") {
     orderBy = "-title";
     return;
+  }else if (type === "characters") {
+      $('.newer[value="modified"]').remove()
+  } else if (type === "characters") {
+      $('.older[value="-modified"]').remove()  
   } else {
     orderBy = "name";
   }
@@ -194,13 +238,16 @@ $type.onchange = function(e) {
 
 $search.onchange = function(e) {
   search = e.target.value
+  totalResultsNum()
 }
 
 $searchButton.onclick = function(e) {
 getApiData()
+totalResultsNum()
 }
 
 window.addEventListener("load", () => {
+  updatePaginationCallback(getApiData)
   getApiData()
 })
 
@@ -213,49 +260,75 @@ async function getDetailData(id) {
     const data = await response.json();
     console.log(data);
     dataComics = data.data.results;
+    totalResultsNum = data.data.total; 
+    render()
+    totalResultsNum()
   } catch (error) {
     console.log(error);
   }
 }
 /* PAGE NUMBER */
 
-$prev.onclick = function(e) {
-  offset -= 20
-  
-}
-
-$next.onclick = function(e) {
-  offset += 20
-}
-
-const totalResultsNum = async() => {
+const totalResultsNum = async () => {
   try {
-    const comics = await getMComics();
-    const totalResults = comics.length; 
+    const response = await fetch(`https://gateway.marvel.com/v1/public/comics?${ts}${publicKey}${hash}`);
+    const data = await response.json();
+    const totalResults = data.data.total;
     $(".total-number").innerHTML = `${totalResults}`;
   } catch (error) {
-    console.error("Error fetching total results:", error);
+    console.error("error", error);
   }
 };
+
 totalResultsNum()
 
-// const pageNumber = async(pageNum) => {
-//     const result = await pageNum
-//     $("#first-page").addEventListener("click", () => {
-//         if(page>2){
-//             page=1
-//             getData()
-//         }
-//     })
-//     $("#last-page").addEventListener("click", () => {
-//         if(page < pageCount){
-//             page=112
-//             getData()
-//         }
-//     })
+const updatePaginationCallback = (callback) => {
+  $('#first-page').onclick = () => {
+    offset = 0
+    callback()
+    updatePagination() 
+  }
 
+  $('#previous-page').onclick = () => {
+    offset -= 20
+    if (offset < 0) {
+      offset = 0
+    }
+    callback()
+    updatePagination() 
+  }
 
+  $('#next-page').onclick = () => {
+    offset += 20
+    callback()
+    updatePagination() 
+  }
+
+//   $('#last-page').onclick = async () => {
+//     try {
+//         const totalResults = await totalResultsNum(); 
+//         const isExact = totalResults % 20 === 0;
+//         const pages = Math.floor(totalResults / 20);
+//         offset = (isExact ? pages - 1 : pages) * 20;
+//         callback();
+//         updatePagination();
+//     } catch (error) {
+//         console.error("Error getting total results:", error);
+//     }
 // }
+}
+
+const updatePagination = () => {
+  if (offset === 0) {
+    $('#first-page').disabled = true
+    $('#previous-page').disabled = true
+  } else {
+    $('#first-page').disabled = false
+    $('#previous-page').disabled = false
+  }
+}
+
+
 
 
 // const numberOfPages = async() => {
