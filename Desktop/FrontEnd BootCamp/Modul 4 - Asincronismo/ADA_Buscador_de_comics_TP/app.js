@@ -67,9 +67,9 @@ const printDataComics = async (title) => {
         console.log("Image URL:", imageUrl);
 
         html += `
-          <div>
+          <div class="hover:text-[#ed1c23]">
             <img src="${imageUrl}" alt="${comic.title}">
-            <p>${comic.title}</p>
+            <p >${comic.title}</p>
           </div>
         `;
       }
@@ -83,7 +83,7 @@ const printDataComics = async (title) => {
   }
 };
 
-printDataComics();
+// printDataComics();
 
 const printDataCharacters = async(name) => {
   try{
@@ -114,7 +114,7 @@ const printDataCharacters = async(name) => {
     console.error("Error:", error);
   }
 };
-printDataCharacters()
+// printDataCharacters()
 
 
 /* FILTER DATA */
@@ -167,6 +167,7 @@ async function getApiData() {
     const data = await response.json();
     dataComics = data.data.results;
     render();
+    totalResultsNum()
   } catch (error) {
     console.log(error);
   }
@@ -193,18 +194,18 @@ function render() {
       sortedData.forEach((comic) => {
         const imageUrl = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
         html += `
-          <div onClick="getDetailData(${comic.id})">
-            <img src="${imageUrl}" alt="${comic.title}">
-            <p>${comic.title}</p>
+          <div onClick="getDetailData(${comic.id})" class="bg-black text-white hover:text-[#ed1c23] hover:border-2">
+            <img src="${imageUrl}" alt="${comic.title}" >
+            <p class="p-1">${comic.title}</p>
           </div>`;
       });
     } else if (type === "characters") {
       sortedData.forEach((character) => {
         const characterURL = `${character.thumbnail.path}.${character.thumbnail.extension}`
         html += `
-          <div onClick="getDetailData(${character.id})">
+          <div onClick="getDetailData(${character.id})" class=" bg-black text-white hover:text-[#ed1c23] hover:shadow-2xl">
             <img src="${characterURL}" alt="${character.name}">
-            <p>${character.name}</p>
+            <p class="p-1">${character.name}</p>
           </div>`;
       });
     }
@@ -214,6 +215,7 @@ function render() {
   
   showResultsContainer.innerHTML = html;
 }
+
 
 $order.onchange = function(e) {
   if (type === "comics" && e.target.value === "name") {
@@ -260,7 +262,6 @@ totalResultsNum()
 }
 
 
-
 async function getDetailData(id) {
   try {
     const response = await fetch(
@@ -273,10 +274,15 @@ async function getDetailData(id) {
     totalResultsNum = data.data.total; 
     render()
     totalResultsNum()
+    showElement([".page-comic"]);
+
   } catch (error) {
     console.log(error);
   }
 }
+
+
+
 /* PAGE NUMBER */
 
 const totalResultsNum = async () => {
@@ -329,29 +335,26 @@ const updatePaginationCallback = (callback) => {
 
 const updatePagination = () => {
   if (offset === 0) {
-    $('#first-page').disabled = true
-    $('#previous-page').disabled = true
+    $("#first-page").disabled = true
+    $("#previous-page").disabled = true
   } else {
-    $('#first-page').disabled = false
-    $('#previous-page').disabled = false
+    $("#first-page").disabled = false
+    $("#previous-page").disabled = false
   }
 }
 
+const numberOfPages = async() => {
+  try{
+    const comics = await getMComics()
+    const totalNumberOfPages = comics.data.total
+    $(".number-of-pages").innerHTML = `${totalNumberOfPages}`;
+  } 
+  catch (error) {
+    console.error("Error fetching total results:", error);
+  }
+}
+numberOfPages()
 
-
-
-
-// const numberOfPages = async() => {
-//   try{
-//     const comics = await getMComics()
-//     const totalNumberOfPages = comics.data.total
-//     $(".number-of-pages").innerHTML = `${totalNumberOfPages}`;
-//   } 
-//   catch (error) {
-//     console.error("Error fetching total results:", error);
-//   }
-// }
-// numberOfPages()
 
 
 
