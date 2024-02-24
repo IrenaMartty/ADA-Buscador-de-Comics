@@ -141,27 +141,34 @@ let dataComics = [];
 
 async function getApiData() {
   try {
-      let orderByParam;
-      if (orderBy === "modified") {
-          orderByParam = "-modified";
+    let orderByParam;
+    if (type === "comics") {
+      if (orderBy === "title") {
+        orderByParam = "title";
+      } else if (orderBy === "-title") {
+        orderByParam = "-title";
       } else {
-          orderByParam = type === "comics" ? (orderBy || "title") : (orderBy ? orderBy : "name");
+        orderByParam = orderBy === "modified" ? "-modified" : "title";
       }
-      const response = await fetch(
-          `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type == "comics" ? "title" : "name"}StartsWith=${search}`}`
-      );
-      const data = await response.json();
-      if (data.data && data.data.results) {
-          dataComics = data.data.results;
+    } else if (type === "characters") {
+      if (orderBy === "name") {
+        orderByParam = "name";
+      } else if (orderBy === "-name") {
+        orderByParam = "-name";
       } else {
-          dataComics = []
+        orderByParam = orderBy === "modified" ? "-modified" : "name";
       }
-      render();
-  } catch (error) {
-      console.log(error);
-      dataComics = []; 
-      render(); 
+    }
 
+    const response = await fetch(
+      `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type === "comics" ? "title" : "name"}StartsWith=${search}`}`
+    );
+
+    const data = await response.json();
+    dataComics = data.data.results;
+    render();
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -229,18 +236,15 @@ $order.onchange = function(e) {
 
 $type.onchange = function(e) {
   type = e.target.value
-  if (type == "comics" && orderBy == "name") {
-    orderBy = "title";
-    return;
-  } else if (type == "comics" && orderBy == "-name") {
-    orderBy = "-title";
-    return;
-  }else if (type === "characters") {
-      $('.newer[value="modified"]').remove()
+  if(type === "comics") {
+    $('.newer[value="modified"]').classList.remove('hidden');
+    $('.older[value="-modified"]').classList.remove('hidden');
   } else if (type === "characters") {
-      $('.older[value="-modified"]').remove()  
+    $('.newer[value="modified"]').classList.add('hidden');
+    $('.older[value="-modified"]').classList.add('hidden');
   } else {
     orderBy = "name";
+    return;
   }
   console.log(orderBy);
 }
@@ -255,10 +259,7 @@ getApiData()
 totalResultsNum()
 }
 
-window.addEventListener("load", () => {
-  updatePaginationCallback(getApiData)
-  getApiData()
-})
+
 
 async function getDetailData(id) {
   try {
@@ -285,7 +286,7 @@ const totalResultsNum = async () => {
     const totalResults = data.data.total;
     $(".total-number").innerHTML = `${totalResults}`;
   } catch (error) {
-    console.error("error", error);
+    console.error("error:", error);
   }
 };
 
@@ -316,13 +317,12 @@ const updatePaginationCallback = (callback) => {
 //   $('#last-page').onclick = async () => {
 //     try {
 //         const totalResults = await totalResultsNum(); 
-//         const isExact = totalResults % 20 === 0;
-//         const pages = Math.floor(totalResults / 20);
-//         offset = (isExact ? pages - 1 : pages) * 20;
+//         const pages = Math.ceil(totalResults / 20); 
+//         offset = (pages - 1) * 20; 
 //         callback();
 //         updatePagination();
 //     } catch (error) {
-//         console.error("Error getting total results:", error);
+//         console.error("error:", error);
 //     }
 // }
 }
@@ -340,6 +340,7 @@ const updatePagination = () => {
 
 
 
+
 // const numberOfPages = async() => {
 //   try{
 //     const comics = await getMComics()
@@ -353,3 +354,8 @@ const updatePagination = () => {
 // numberOfPages()
 
 
+
+window.addEventListener("load", () => {
+  updatePaginationCallback(getApiData)
+  getApiData()
+})
