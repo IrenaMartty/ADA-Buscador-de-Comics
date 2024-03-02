@@ -132,8 +132,25 @@ const getApiData = async () =>  {
 
 const showComicDetails = () => {
   showElement([".page-comic"])
-  // hideElement([".page-results"])
+  hideElement([".page-results"])
 }
+
+const getDetailDataComic = async (id) => {
+  try {
+    console.log('Fetching comic data for ID:', id);
+    const response = await fetch(`${urlBase}comics/${id}?${ts}${publicKey}${hash}`); 
+    const { data: { results: [comic] } } = await response.json();
+    console.log(response); 
+    const img = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
+    const releaseDate = new Date(comic.dates.find((date) => date.type === 'onsaleDate').date);
+    const writers = `${comic.creators.items}`;
+    updateDetailDataComic(img, comic.title, releaseDate, writers, comic.description);
+    showComicDetails();
+  } catch (error) {
+    console.error("Error fetching comic data:", error);
+  }
+};
+console.log(getDetailDataComic());
 
 const updateDetailDataComic = (img, title, releaseDate, writers, description) => {
   const comicImage = $(".comic-image");
@@ -157,32 +174,41 @@ const updateDetailDataComic = (img, title, releaseDate, writers, description) =>
     comicDescription.innerHTML = description;
   }
 };
-
-const getDetailDataComic = async (comicId) => {
-  try {
-    console.log('Fetching comic data for ID:', comicId);
-    const response = await fetch(`${urlBase}comics/${comicId}?${ts}${publicKey}${hash}`); 
-    const { data: { results: [comic] } } = await response.json();
-    console.log(data)
-    const img = `${comic.thumbnail.path}.${comic.thumbnail.extension}`;
-    const releaseDate = new Date(comic.dates.find((date) => date.type === 'onsaleDate').date);
-    const writers = `${comic.creators.items}`;
-    updateDetailDataComic(img, comic.title, releaseDate, writers, comic.description);
-    showComicDetails();
-    
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
-console.log(getDetailDataComic());
+// Get character details
 
 
 const showCharacterDetails = () => {
-  showElement([".page-comic"])
+  showElement([".page-character"])
   hideElement([".page-results"])
 }
 
+const getDetailDataCharacter = async (id) => {
+  try {
+    console.log('Fetching character data for ID:', id);
+    const response = await fetch(`${urlBase}characters/${id}?${ts}${publicKey}${hash}`); 
+    const { data: { results: [character] } } = await response.json();
+    console.log(response); // Log the response object to inspect the fetched data
+    const img = `${character.thumbnail.path}.${character.thumbnail.extension}`;
+    updateCharacterDetails(img, character.name); // Assuming character name is used for title
+    showCharacterDetails();
+  } catch (error) {
+    console.error("Error fetching character data:", error);
+  }
+};
 
+// getDetailDataCharacter();
+
+
+const updateDetailDataCharacters = (img, title) => {
+  const characterImage = $(".character-image");
+  if (characterImage) {
+    characterImage.src = img;
+  }
+  const characterTitle = $(".character-title");
+  if (characterTitle) {
+    character.innerHTML = title;
+  }
+};
 
 // RENDER
 const render = async () => {
