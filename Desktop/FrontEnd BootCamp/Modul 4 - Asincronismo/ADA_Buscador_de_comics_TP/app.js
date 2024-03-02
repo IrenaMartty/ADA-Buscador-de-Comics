@@ -24,10 +24,10 @@ const today = new Date()
 
 let resultsNum = 0
 
-const updateResultsCount = (count) => {
-  $(".total-number").innerHTML = count
-  resultsNum = count
-}
+// const updateResultsCount = (count) => {
+//   $(".total-number").innerHTML = count
+//   resultsNum = count
+// }
 
 // console.log(today)
 
@@ -57,7 +57,6 @@ const getMComics = async (title) => {
   }
 }
 
-
 const getMCharacters = async (name) => {
   try {
     const showName = name ? `&nameStartsWith=${name}` : "";
@@ -74,7 +73,7 @@ const getMCharacters = async (name) => {
   }
 }
 
-console.log(getMComics());
+// console.log(getMComics());
 
 // // Elements
 const $order = $("#order")
@@ -96,8 +95,6 @@ const $next = $("#next-page");
 const $last = $("#last-page");
 
 
-
-/* FILTER DATA */
 const getApiData = async () =>  {
   try {
     let orderByParam;
@@ -120,7 +117,7 @@ const getApiData = async () =>  {
     }
 
     const response = await fetch(
-      `https://gateway.marvel.com/v1/public/${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type === "comics" ? "title" : "name"}StartsWith=${search}`}`
+      `${urlBase}${type}?${ts}${publicKey}${hash}&offset=${offset}&orderBy=${orderByParam}${search && `&${type === "comics" ? "title" : "name"}StartsWith=${search}`}`
     );
 
     const data = await response.json();
@@ -161,27 +158,6 @@ const updateDetailDataComic = (img, title, releaseDate, writers, description) =>
   }
 };
 
-// const getDetailData = async (id) => {
-//   try {
-//     const response = await fetch(
-//       `https://gateway.marvel.com/v1/public/${type}/${id}`
-//     );
-//     console.log(response);
-//     const data = await response.json();
-//     console.log(data);
-//     dataComics = data.data.results;
-//     totalResultsNum = data.data.total; 
-//     render()
-//     totalResultsNum()
-//     showElement([".page-comic"]);
-
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-
-
 const getDetailDataComic = async (comicId) => {
   try {
     console.log('Fetching comic data for ID:', comicId);
@@ -206,20 +182,7 @@ const showCharacterDetails = () => {
   hideElement([".page-results"])
 }
 
-// const getDetailDataCharacter = async (characterId) => {
-//   const {
-//     data: {
-//       results: [character],
-//     },
-//   } = await fetchURL(getApiData('characters', characterId))
 
-//   updateCharacterDetails(
-//     `${character.thumbnail.path}.${character.thumbnail.extension}`,
-//     character.name,
-//     character.description
-//   )
-//   showCharacterDetails()
-// }
 
 // RENDER
 const render = async () => {
@@ -263,6 +226,12 @@ const render = async () => {
   showResultsContainer.innerHTML = html;
 }
 
+/* FILTER DATA */
+
+const defaultOrders = {
+  comics: "title",
+  characters: "name"
+}
 
 $order.onchange = function(e) {
   if (type === "comics" && e.target.value === "name") {
@@ -288,11 +257,12 @@ $type.onchange = function(e) {
   if(type === "comics") {
     $('.newer[value="modified"]').classList.remove('hidden');
     $('.older[value="-modified"]').classList.remove('hidden');
+    orderBy = defaultOrders[type]
   } else if (type === "characters") {
     $('.newer[value="modified"]').classList.add('hidden');
     $('.older[value="-modified"]').classList.add('hidden');
+    orderBy = defaultOrders[type]
   } else {
-    orderBy = "name";
     return;
   }
   // console.log(orderBy);
@@ -310,39 +280,15 @@ getApiData()
 totalResultsNum()
 }
 
-
-// const getDetailData = async (id) => {
-//   try {
-//     const response = await fetch(
-//       `https://gateway.marvel.com/v1/public/${type}/${id}`
-//     );
-//     console.log(response);
-//     const data = await response.json();
-//     console.log(data);
-//     dataComics = data.data.results;
-//     totalResultsNum = data.data.total; 
-//     render()
-//     totalResultsNum()
-//     showElement([".page-comic"]);
-
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-
-
-
-
-/* RESULTS AND PAGE COUNTING */
+/* RESULTS AND PAGE COUNT */
 
 const totalResultsNum = async () => {
   try {
     let apiUrl;
     if (type === "comics") {
-      apiUrl = `https://gateway.marvel.com/v1/public/comics?${ts}${publicKey}${hash}`;
+      apiUrl = `${urlBase}comics?${ts}${publicKey}${hash}`;
     } else if (type === "characters") {
-      apiUrl = `https://gateway.marvel.com/v1/public/characters?${ts}${publicKey}${hash}`;
+      apiUrl = `${urlBase}characters?${ts}${publicKey}${hash}`;
     }
     if (search) {
       apiUrl += `&${type === "comics" ? "title" : "name"}StartsWith=${search}`;
@@ -355,7 +301,6 @@ const totalResultsNum = async () => {
     console.error("error:", error);
   }
 };
-
 
 const updatePaginationCallback = (callback) => {
   
@@ -389,7 +334,6 @@ const updatePaginationCallback = (callback) => {
   }
 }
 
-
 const updatePagination = () => {
   console.log('Offset:', offset);
   console.log('Results Count:', resultsNum)
@@ -409,22 +353,6 @@ const updatePagination = () => {
     $('#next-page').disabled = false
   }
 }
-
-
-// const numberOfPages = async() => {
-//   try{
-//     const comics = await getMComics()
-//     const totalNumberOfPages = comics.data.total
-//     $(".number-of-pages").innerHTML = `${totalNumberOfPages}`;
-//   } 
-//   catch (error) {
-//     console.error("Error fetching total results:", error);
-//   }
-// }
-// numberOfPages()
-
-
-
 
 window.addEventListener("load", () => {
   updatePaginationCallback(getApiData)

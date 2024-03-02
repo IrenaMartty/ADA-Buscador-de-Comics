@@ -37,12 +37,12 @@
             <div class="p-1 mr-10 grow">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <label for="search-text"></label>
-                <input type="text" id="search-text" class="search-text p-1" placeholder="Ingresa aquí">
+                <input type="text" id="search-text" class="search-text p-1 mb-10" placeholder="Ingresa aquí">
             </div>
             <div>
-                <div class="max-sm:flex-col">
+                <div class="max-[500px]:flex-col">
                     <label for="type">Tipo</label>
-                    <select name="type" id="type" class="border-2 rounded p-1 mr-10 mb-10 font-semibold hover:border-[#ed1c23]">
+                    <select name="type" id="type" class="border-2 rounded p-1 mr-10 mb-10 mt-10font-semibold hover:border-[#ed1c23]">
                         <option value="comics">Comics</option>
                         <option value="characters">Personajes</option>
                     </select>
@@ -76,7 +76,18 @@
                 <img class="comic-characters" src="" alt="">
             </div>
         </section>
-        <section class="page-character hidden"></section>
+        <section class="page-character hidden">
+            <img class="character-image" src="" alt="">
+            <div class="character-info">
+                <h2 class="character-title"></h2>
+                <h3>Publicado:</h3>
+                <p class="character-date"></p>
+                <h3>Guionistas:</h3>
+                <p class="character-writers"></p>
+                <h3>Descripción:</h3>
+                <p class="character-description"></p>
+            </div>
+        </section>
         <section class="page-results">
             <h2 class="search-title text-5xl font-bold ">
                 Resultados
@@ -110,6 +121,7 @@
         </div>
         
     </div>
+
 </main>
 <footer>
     <div class="footer bg-black text-white flex justify-center text-2xl font-bold p-2 font-['Rubik_Glitch_Pop']">Hecho con
